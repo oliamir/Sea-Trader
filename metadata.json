@@ -1,0 +1,5 @@
+{
+  "name": "סוחר הים (Sea Trader)",
+  "description": "Weekly turn-based trading game. Trade Copper, Wheat, and Olives between Israel, Egypt, Turkey, and Italy.",
+  "requestFramePermissions": []
+}
