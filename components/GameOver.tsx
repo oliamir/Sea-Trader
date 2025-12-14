@@ -17,7 +17,7 @@ const GameOver: React.FC<GameOverProps> = ({ state, finalPrices, onRestart }) =>
     return total + ((amount as number) * (finalPrices[id] || 0));
   }, 0);
 
-  const totalValue = state.cash + state.bankBalance + inventoryValue;
+  const totalValue = state.cash + state.bankBalance - state.loan + inventoryValue;
   const profit = totalValue - INITIAL_CASH;
   const isWin = profit > 0;
 
@@ -65,17 +65,23 @@ const GameOver: React.FC<GameOverProps> = ({ state, finalPrices, onRestart }) =>
         </p>
 
         {/* Score Card */}
-        <div className="w-full max-w-sm bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100 shadow-sm">
+        <div className="w-full max-w-sm bg-blue-50 rounded-2xl p-4 mb-6 border border-blue-100 shadow-sm text-sm">
           <div className="flex justify-between items-center py-1 border-b border-blue-100/50">
-              <span className="text-blue-800/70 text-sm font-medium">מזומן</span>
+              <span className="text-blue-800/70 font-medium">מזומן</span>
               <span className="font-bold text-blue-900">${state.cash.toLocaleString()}</span>
           </div>
           <div className="flex justify-between items-center py-1 border-b border-blue-100/50">
-              <span className="text-blue-800/70 text-sm font-medium">בנק</span>
+              <span className="text-blue-800/70 font-medium">בנק</span>
               <span className="font-bold text-blue-900">${state.bankBalance.toLocaleString()}</span>
           </div>
+          {state.loan > 0 && (
+             <div className="flex justify-between items-center py-1 border-b border-blue-100/50">
+                <span className="text-red-500 font-medium">הלוואות</span>
+                <span className="font-bold text-red-600">-${state.loan.toLocaleString()}</span>
+            </div>
+          )}
           <div className="flex justify-between items-center py-1 border-b border-blue-100/50">
-              <span className="text-blue-800/70 text-sm font-medium">שווי סחורה</span>
+              <span className="text-blue-800/70 font-medium">שווי סחורה</span>
               <span className="font-bold text-blue-900">${inventoryValue.toLocaleString()}</span>
           </div>
           

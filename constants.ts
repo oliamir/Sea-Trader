@@ -49,3 +49,5 @@ export const TRANSLATIONS = {
 
 export const INITIAL_CASH = 5000;
 export const MAX_DAYS = 7;
+export const LOAN_INTEREST_RATE = 0.05;
+export const INITIAL_CAPACITY = 100;

@@ -6,19 +6,26 @@ import { TimeOfDay } from '../types';
 interface TravelProps {
   currentLocationId: string;
   currentTime: TimeOfDay;
+  currentLoad: number;
+  maxCapacity: number;
   onTravel: (destinationId: string) => void;
   onCancel: () => void;
 }
 
-const Travel: React.FC<TravelProps> = ({ currentLocationId, currentTime, onTravel, onCancel }) => {
+const Travel: React.FC<TravelProps> = ({ currentLocationId, currentTime, currentLoad, maxCapacity, onTravel, onCancel }) => {
   // 0=Morning, 1=Noon, 2=Evening
   const currentTimeIndex = TIME_ORDER.indexOf(currentTime);
+  const isOverloaded = currentLoad > maxCapacity;
 
   return (
     <div className="flex flex-col h-full">
       <div className="text-center mb-6">
           <h2 className="text-3xl font-black text-gray-900">יעד הפלגה</h2>
-          <p className="text-gray-500 mt-2">בחר את הנמל הבא שלך</p>
+          {isOverloaded ? (
+              <p className="text-red-500 font-bold mt-2 animate-pulse">⚠️ הספינה עמוסה מדי! ({currentLoad}/{maxCapacity})</p>
+          ) : (
+              <p className="text-gray-500 mt-2">בחר את הנמל הבא שלך</p>
+          )}
       </div>
       
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 overflow-y-auto p-1">
@@ -29,10 +36,10 @@ const Travel: React.FC<TravelProps> = ({ currentLocationId, currentTime, onTrave
           const hours = turns * 6;
           
           // Logic: Cannot sail if arrival pushes beyond Evening (index 2) of current day
-          // Morning(0) + 1 turn = Noon(1) -> OK
-          // Morning(0) + 2 turns = Evening(2) -> OK
-          // Noon(1) + 2 turns = Night(3) -> ERROR
-          const isValid = currentTimeIndex + turns <= 2;
+          const isTimeValid = currentTimeIndex + turns <= 2;
+          
+          // Block if overloaded OR time invalid
+          const isValid = isTimeValid && !isOverloaded;
 
           return (
             <button
@@ -66,10 +73,16 @@ const Travel: React.FC<TravelProps> = ({ currentLocationId, currentTime, onTrave
                           {hours} שעות הפלגה
                       </span>
                       
-                      {!isValid && (
+                      {!isTimeValid && !isOverloaded && (
                          <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded border border-red-100 mt-1">
                              נדרשת מנוחה (לילה)
                          </span>
+                      )}
+                      
+                      {isOverloaded && (
+                          <span className="text-[10px] font-bold text-red-600 bg-red-100 px-2 py-0.5 rounded border border-red-200 mt-1">
+                              משקל עודף
+                          </span>
                       )}
                   </div>
               </div>
@@ -79,6 +92,11 @@ const Travel: React.FC<TravelProps> = ({ currentLocationId, currentTime, onTrave
       </div>
 
       <div className="mt-auto text-center pt-4">
+        {isOverloaded && (
+            <div className="mb-4 p-3 bg-red-50 text-red-800 text-sm rounded-xl border border-red-100 text-center">
+                עליך למכור {currentLoad - maxCapacity} יחידות כדי להפליג.
+            </div>
+        )}
         <button 
           onClick={onCancel}
           className="text-gray-500 hover:text-gray-900 font-medium px-6 py-2 rounded-lg hover:bg-gray-100 transition-colors"

@@ -21,7 +21,9 @@ export interface Good {
 export interface PlayerState {
   cash: number;
   bankBalance: number;
+  loan: number;
   inventory: Record<string, number>;
+  maxCapacity: number;
   location: string;
   day: number; // 1 to 7
   timeOfDay: TimeOfDay;
@@ -29,13 +31,17 @@ export interface PlayerState {
 }
 
 export interface GameEvent {
-  type: 'PIRATES' | 'STORM' | 'TREASURE' | 'SMOOTH_SAILING';
+  type: 'PIRATES' | 'STORM' | 'TREASURE' | 'SMOOTH_SAILING' | 'SHIPYARD';
   title: string;
   message: string;
   outcome: {
     cashChange?: number;
     inventoryLoss?: boolean; // Lose percentage of goods
     turnDelay?: boolean;
+  };
+  data?: {
+      upgradeCost?: number;
+      newCapacity?: number;
   };
 }
 
@@ -51,5 +57,6 @@ export enum GameView {
   Event = 'EVENT',
   GameOver = 'GAMEOVER',
   Bank = 'BANK',
-  Sailing = 'SAILING'
+  Sailing = 'SAILING',
+  Helper = 'HELPER'
 }

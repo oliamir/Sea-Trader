@@ -3,7 +3,7 @@ import { GameEvent } from '../types';
 
 interface EventProps {
   event: GameEvent;
-  onContinue: () => void;
+  onContinue: (choice?: string) => void;
 }
 
 const Event: React.FC<EventProps> = ({ event, onContinue }) => {
@@ -13,6 +13,7 @@ const Event: React.FC<EventProps> = ({ event, onContinue }) => {
           case 'PIRATES': return '🏴‍☠️';
           case 'TREASURE': return '💎';
           case 'STORM': return '⛈️';
+          case 'SHIPYARD': return '🏗️';
           default: return '⛵';
       }
   };
@@ -22,6 +23,7 @@ const Event: React.FC<EventProps> = ({ event, onContinue }) => {
         case 'PIRATES': return 'bg-red-50 text-red-900 ring-red-100';
         case 'TREASURE': return 'bg-yellow-50 text-yellow-900 ring-yellow-100';
         case 'STORM': return 'bg-slate-50 text-slate-900 ring-slate-200';
+        case 'SHIPYARD': return 'bg-amber-50 text-amber-900 ring-amber-200';
         default: return 'bg-blue-50 text-blue-900 ring-blue-100';
     }
   };
@@ -42,12 +44,29 @@ const Event: React.FC<EventProps> = ({ event, onContinue }) => {
                 {event.message}
             </p>
             
-            <button 
-                onClick={onContinue}
-                className="w-full py-4 bg-gray-900 text-white rounded-xl text-lg font-bold hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
-            >
-                המשך במשחק
-            </button>
+            {event.type === 'SHIPYARD' && event.data ? (
+                <div className="flex flex-col gap-3">
+                     <button 
+                        onClick={() => onContinue('UPGRADE')}
+                        className="w-full py-4 bg-amber-600 text-white rounded-xl text-lg font-bold hover:bg-amber-700 hover:shadow-lg transition-all"
+                    >
+                        שדרג ספינה (${event.data.upgradeCost})
+                    </button>
+                    <button 
+                        onClick={() => onContinue('IGNORE')}
+                        className="w-full py-3 bg-gray-100 text-gray-600 rounded-xl text-lg font-bold hover:bg-gray-200 transition-all"
+                    >
+                        לא תודה
+                    </button>
+                </div>
+            ) : (
+                <button 
+                    onClick={() => onContinue()}
+                    className="w-full py-4 bg-gray-900 text-white rounded-xl text-lg font-bold hover:bg-gray-800 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200"
+                >
+                    המשך במשחק
+                </button>
+            )}
         </div>
       </div>
     </div>
