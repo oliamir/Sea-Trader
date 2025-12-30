@@ -32,7 +32,13 @@ const App: React.FC = () => {
     const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
     const [pendingDestination, setPendingDestination] = useState<string | null>(null);
     const [showDayTransition, setShowDayTransition] = useState(false);
-    const [isBotActive, setIsBotActive] = useState(false);
+
+    // Auto-start bot if ?bot=true is present
+    const [isBotActive, setIsBotActive] = useState(() => {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('bot') === 'true';
+    });
+
     const [botGamesPlayed, setBotGamesPlayed] = useState(0);
 
     // Bot Loop
