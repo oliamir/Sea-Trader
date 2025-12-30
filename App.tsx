@@ -3,6 +3,7 @@ import { PlayerState, GameView, GameEvent, TimeOfDay } from './types';
 import { LOCATIONS, INITIAL_CASH, MAX_DAYS, GOODS, TIME_ORDER, DAYS_OF_WEEK, LOAN_INTEREST_RATE, INITIAL_CAPACITY } from './constants';
 import { generateGlobalPrices, getNextTime, generateTravelEvent, getTravelDuration } from './services/gameEngine';
 import { saveGameResult } from './services/firebaseService';
+import { decideBotAction } from './services/bot';
 import Market from './components/Market';
 import Travel from './components/Travel';
 import Bank from './components/Bank';
@@ -31,6 +32,43 @@ const App: React.FC = () => {
     const [currentEvent, setCurrentEvent] = useState<GameEvent | null>(null);
     const [pendingDestination, setPendingDestination] = useState<string | null>(null);
     const [showDayTransition, setShowDayTransition] = useState(false);
+    const [isBotActive, setIsBotActive] = useState(false);
+    const [botGamesPlayed, setBotGamesPlayed] = useState(0);
+
+    // Bot Loop
+    useEffect(() => {
+        if (!isBotActive) return;
+        if (botGamesPlayed >= 5) {
+            setIsBotActive(false);
+            alert('Bot finished 5 games!');
+            return;
+        }
+
+        const timer = setTimeout(() => {
+            const decision = decideBotAction(playerState, allPrices[playerState.location] || {}, currentEvent);
+
+            if (decision) {
+                console.log('Bot Action:', decision);
+                switch (decision.action) {
+                    case 'TRADE':
+                        handleTrade(decision.payload.goodId, decision.payload.amount, decision.payload.isBuy);
+                        break;
+                    case 'TRAVEL':
+                        handleTravelSelect(decision.payload);
+                        break;
+                    case 'EVENT':
+                        handleEventAction(decision.payload);
+                        break;
+                    case 'RESTART':
+                        handleRestart();
+                        setBotGamesPlayed(p => p + 1);
+                        break;
+                }
+            }
+        }, 1000); // 1 second interval for visualization
+
+        return () => clearTimeout(timer);
+    }, [isBotActive, playerState, currentEvent, allPrices, botGamesPlayed]);
 
     // Checks for morning shipyard offers
     const checkForShipyardOffer = (state: PlayerState) => {
@@ -378,6 +416,14 @@ const App: React.FC = () => {
                             <span className="font-bold text-sm">היועץ</span>
                         </button>
                     )}
+
+                    {/* Bot Toggle - Dev Only (Top Left) */}
+                    <button
+                        onClick={() => setIsBotActive(!isBotActive)}
+                        className={`absolute top-4 left-4 z-20 p-2 text-xs font-bold rounded-full border shadow-md transition-all ${isBotActive ? 'bg-red-100 text-red-800 border-red-200 animate-pulse' : 'bg-gray-100 text-gray-500 border-gray-200'}`}
+                    >
+                        {isBotActive ? `🤖 Playing (${botGamesPlayed}/5)` : '🤖 Bot'}
+                    </button>
 
                     {/* Animation Overlay */}
                     {view === GameView.Sailing && pendingDestination && (
